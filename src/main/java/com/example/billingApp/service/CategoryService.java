@@ -10,4 +10,6 @@ public interface CategoryService {
     CategoryResponse addCategory(CategoryRequest request);
 
     List<CategoryResponse>  getCategories();
+
+    void deleteCategory(String id);
 }

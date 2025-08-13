@@ -6,6 +6,7 @@ import com.example.billingApp.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -25,5 +26,15 @@ public class CategoryController {
     @GetMapping
     public List<CategoryResponse> fetchCategories() {
         return categoryService.getCategories();
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{categoryId}")
+    public void deleteCategory(@PathVariable String categoryId) {
+        try {
+            categoryService.deleteCategory(categoryId);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 }

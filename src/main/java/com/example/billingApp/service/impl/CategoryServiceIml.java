@@ -35,6 +35,13 @@ public class CategoryServiceIml implements CategoryService {
         .collect(Collectors.toList());
     }
 
+    @Override
+    public void deleteCategory(String id) {
+        CategoryEntity existingCategory = categoryRepository.findByCategoryId(id)
+            .orElseThrow(() -> new RuntimeException("Category not found: " + id));
+        categoryRepository.delete(existingCategory);
+    }
+
     private CategoryEntity convertToEntity(CategoryRequest request) {
         return CategoryEntity.builder()
                 .categoryId(UUID.randomUUID().toString())
