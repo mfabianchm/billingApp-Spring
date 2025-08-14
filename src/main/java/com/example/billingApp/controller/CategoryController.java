@@ -3,9 +3,12 @@ package com.example.billingApp.controller;
 import com.example.billingApp.io.CategoryRequest;
 import com.example.billingApp.io.CategoryResponse;
 import com.example.billingApp.service.CategoryService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -19,8 +22,18 @@ public class CategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryResponse addCategory(@RequestBody CategoryRequest request) {
-        return categoryService.addCategory(request);
+    public CategoryResponse addCategory(@RequestPart("category") String categoryString, @RequestPart("file") MultipartFile file) {
+        ObjectMapper mapper = new ObjectMapper();
+        CategoryRequest request = null;
+
+        try {
+            request = mapper.readValue(categoryString, CategoryRequest.class);
+            return categoryService.addCategory(request, file);
+        }
+        catch (JsonProcessingException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occurred while parsing JSON: "+e.getMessage());
+        }
+
     }
 
     @GetMapping
