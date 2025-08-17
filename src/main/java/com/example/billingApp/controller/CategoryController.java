@@ -1,7 +1,7 @@
 package com.example.billingApp.controller;
 
-import com.example.billingApp.io.CategoryRequest;
-import com.example.billingApp.io.CategoryResponse;
+import com.example.billingApp.io.Category.CategoryRequest;
+import com.example.billingApp.io.Category.CategoryResponse;
 import com.example.billingApp.service.CategoryService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

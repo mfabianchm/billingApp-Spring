@@ -2,7 +2,7 @@ package com.example.billingApp.service;
 
 import com.example.billingApp.io.Order.OrderRequest;
 import com.example.billingApp.io.Order.OrderResponse;
-import com.example.billingApp.io.PaymentVerificationRequest;
+import com.example.billingApp.io.Payment.PaymentVerificationRequest;
 
 import java.time.LocalDate;
 import java.util.List;

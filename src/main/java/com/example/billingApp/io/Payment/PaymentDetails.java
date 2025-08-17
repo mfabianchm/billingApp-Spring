@@ -1,4 +1,4 @@
-package com.example.billingApp.io;
+package com.example.billingApp.io.Payment;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;

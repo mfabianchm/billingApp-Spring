@@ -1,7 +1,7 @@
 package com.example.billingApp.io.Order;
 
-import com.example.billingApp.io.PaymentDetails;
-import com.example.billingApp.io.PaymentMethod;
+import com.example.billingApp.io.Payment.PaymentDetails;
+import com.example.billingApp.io.Payment.PaymentMethod;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package com.example.billingApp.service;
 
-import com.example.billingApp.io.CategoryRequest;
-import com.example.billingApp.io.CategoryResponse;
+import com.example.billingApp.io.Category.CategoryRequest;
+import com.example.billingApp.io.Category.CategoryResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

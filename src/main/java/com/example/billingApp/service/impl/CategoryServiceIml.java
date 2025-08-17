@@ -1,8 +1,8 @@
 package com.example.billingApp.service.impl;
 
 import com.example.billingApp.entity.CategoryEntity;
-import com.example.billingApp.io.CategoryRequest;
-import com.example.billingApp.io.CategoryResponse;
+import com.example.billingApp.io.Category.CategoryRequest;
+import com.example.billingApp.io.Category.CategoryResponse;
 import com.example.billingApp.repository.CategoryRepository;
 import com.example.billingApp.service.CategoryService;
 import com.example.billingApp.service.FileUploadService;

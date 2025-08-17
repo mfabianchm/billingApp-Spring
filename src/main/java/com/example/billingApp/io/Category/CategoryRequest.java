@@ -1,4 +1,4 @@
-package com.example.billingApp.io;
+package com.example.billingApp.io.Category;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

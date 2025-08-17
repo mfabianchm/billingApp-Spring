@@ -1,14 +1,13 @@
 package com.example.billingApp.entity;
 
-import com.example.billingApp.io.PaymentDetails;
-import com.example.billingApp.io.PaymentMethod;
+import com.example.billingApp.io.Payment.PaymentDetails;
+import com.example.billingApp.io.Payment.PaymentMethod;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
