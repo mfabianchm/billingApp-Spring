@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     public List<UserResponse> getUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(user -> convertToResponse(user))
+                .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
 

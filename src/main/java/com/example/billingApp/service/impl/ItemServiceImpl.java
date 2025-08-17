@@ -36,12 +36,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponse add(ItemRequest request, MultipartFile file) throws IOException {
-        String fileName = UUID.randomUUID().toString()+"."+ StringUtils.getFilenameExtension(file.getOriginalFilename());
-        Path uploadPath = Paths.get("uploads").toAbsolutePath().normalize();
-        Files.createDirectories(uploadPath);
-        Path targetLocation = uploadPath.resolve(fileName);
-        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
-        String imgUrl = "http://localhost:8080/api/v1.0/uploads/"+fileName;
+
+        /*Use this to upload image to AWS
+        String imgUrl = fileUploadService.uploadFile(file); */
+
+        //Method for storing images locally
+        String imgUrl = saveImageLocally(file);
+
         ItemEntity newItem = convertToEntity(request);
         CategoryEntity existingCategory = categoryRepository.findByCategoryId(request.getCatrgoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found: " +request.getCatrgoryId()));
@@ -63,17 +64,13 @@ public class ItemServiceImpl implements ItemService {
     public void deleteItem(String itemId) {
         ItemEntity existingItem = itemRepository.findByItemId(itemId)
                 .orElseThrow(() -> new RuntimeException("Item not found: " +itemId));
-        String imgUrl = existingItem.getImgUrl();
-        String fileName = imgUrl.substring(imgUrl.lastIndexOf("/")+1);
-        Path uploadPath = Paths.get("uploads").toAbsolutePath().normalize();
-        Path filePath = uploadPath.resolve(fileName);
-        try {
-            Files.deleteIfExists(filePath);
-            itemRepository.delete(existingItem);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to delete the image");
-        }
+
+        /*Method fot deleting image in AWS
+        boolean isFileDelete = fileUploadService.deleteFile(existingItem.getImgUrl());
+         */
+
+        //Method for deleting images locally
+        deleteImageLocally(existingItem);
     }
 
     private ItemResponse convertToResponse(ItemEntity newItem) {
@@ -97,5 +94,28 @@ public class ItemServiceImpl implements ItemService {
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .build();
+    }
+
+    private String saveImageLocally(MultipartFile file)  throws IOException {
+        String fileName = UUID.randomUUID().toString()+"."+ StringUtils.getFilenameExtension(file.getOriginalFilename());
+        Path uploadPath = Paths.get("uploads").toAbsolutePath().normalize();
+        Files.createDirectories(uploadPath);
+        Path targetLocation = uploadPath.resolve(fileName);
+        Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+        String imgUrl = "http://localhost:8080/api/v1/uploads/"+fileName;
+        return imgUrl;
+    }
+
+    private void deleteImageLocally(ItemEntity existingItem) {
+        String imgUrl = existingItem.getImgUrl();
+        String fileName = imgUrl.substring(imgUrl.lastIndexOf("/")+1);
+        Path uploadPath = Paths.get("uploads").toAbsolutePath().normalize();
+        Path filePath = uploadPath.resolve(fileName);
+        try {
+            Files.deleteIfExists(filePath);
+            itemRepository.delete(existingItem);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
