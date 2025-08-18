@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -27,11 +28,20 @@ public class CategoryController {
         CategoryRequest request = null;
 
         try {
+            //Parse JSON string to DTO
             request = mapper.readValue(categoryString, CategoryRequest.class);
-            return categoryService.addCategory(request, file);
         }
         catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Exception occurred while parsing JSON: "+e.getMessage());
+        }
+
+        try {
+            return categoryService.addCategory(request, file);
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error saving file: " + e.getMessage()
+            );
         }
 
     }

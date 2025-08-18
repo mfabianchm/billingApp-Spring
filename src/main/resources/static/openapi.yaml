@@ -1,0 +1,737 @@
+openapi: 3.0.1
+info:
+  title: E-commerce API
+  version: 1.0.0
+  description: API endpoints for authentication, user management, categories, items, orders, dashboards, and payments.
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local server
+
+tags:
+  - name: Auth
+    description: Authentication endpoints
+  - name: Users
+    description: Admin user management
+  - name: Categories
+    description: CRUD operations for categories
+  - name: Items
+    description: CRUD operations for items
+  - name: Orders
+    description: Order creation and retrieval
+  - name: Dashboard
+    description: Dashboard statistics for sales and orders
+  - name: Payments
+    description: Payment creation and verification
+
+paths:
+  /login:
+    post:
+      tags: [Auth]
+      summary: User login
+      description: Authenticates a user and returns a JWT token and role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+              examples:
+                success:
+                  value:
+                    email: user@example.com
+                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    role: USER
+        '400':
+          description: Invalid email or password
+        '403':
+          description: User disabled
+
+  /encode:
+    post:
+      tags: [Auth]
+      summary: Encode a password
+      description: Returns a hashed version of the password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  example: mySecret123
+      responses:
+        '200':
+          description: Encoded password
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "$2a$10$examplehash..."
+
+  /admin/register:
+    post:
+      tags: [Users]
+      summary: Register a new user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Unable to create user
+
+  /admin/users:
+    get:
+      tags: [Users]
+      summary: Get all users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+
+  /admin/users/{id}:
+    delete:
+      tags: [Users]
+      summary: Delete a user by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: usr123
+      responses:
+        '204':
+          description: User deleted
+        '404':
+          description: User not found
+
+  /categories:
+    post:
+      tags: [Categories]
+      summary: Add a new category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+                  description: JSON string of CategoryRequest
+                  example: '{"name":"Drinks","description":"Beverages","bgColor":"#FF0000"}'
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryResponse'
+    get:
+      tags: [Categories]
+      summary: Fetch all categories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryResponse'
+
+  /categories/{categoryId}:
+    delete:
+      tags: [Categories]
+      summary: Delete a category by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: cat123
+      responses:
+        '204':
+          description: Category deleted
+        '404':
+          description: Category not found
+
+  /items:
+    get:
+      tags: [Items]
+      summary: Get all items
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemResponse'
+
+  /admin/items:
+    post:
+      tags: [Items]
+      summary: Add a new item
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                item:
+                  type: string
+                  description: JSON string of ItemRequest
+                  example: '{"name":"Burger","price":50.0,"catrgoryId":"cat123","description":"Delicious burger"}'
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Item created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemResponse'
+
+  /admin/items/{itemId}:
+    delete:
+      tags: [Items]
+      summary: Delete an item by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: itm123
+      responses:
+        '204':
+          description: Item deleted
+        '404':
+          description: Item not found
+
+  /orders:
+    post:
+      tags: [Orders]
+      summary: Create a new order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderRequest'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+    get:
+      tags: [Orders]
+      summary: Get latest orders
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of recent orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderResponse'
+
+  /orders/{orderId}:
+    delete:
+      tags: [Orders]
+      summary: Delete an order
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: ord123
+      responses:
+        '204':
+          description: Order deleted
+
+  /dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Get dashboard data
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+
+  /payments/create-order:
+    post:
+      tags: [Payments]
+      summary: Create a Razorpay order
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Razorpay order created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RazorpayOrderResponse'
+
+  /payments/verify:
+    post:
+      tags: [Payments]
+      summary: Verify payment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentVerificationRequest'
+      responses:
+        '200':
+          description: Payment verified and order updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderResponse'
+
+components:
+  schemas:
+    AuthRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          example: mySecret123
+
+    AuthResponse:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        role:
+          type: string
+          example: USER
+
+    UserRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - role
+      properties:
+        name:
+          type: string
+          example: Admin User
+        email:
+          type: string
+          format: email
+          example: admin@example.com
+        password:
+          type: string
+          example: mySecret123
+        role:
+          type: string
+          example: ADMIN
+
+    UserResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          example: usr123
+        name:
+          type: string
+          example: Admin User
+        email:
+          type: string
+          format: email
+          example: admin@example.com
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-08-18T12:34:56.789Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-08-18T12:34:56.789Z"
+        role:
+          type: string
+          example: ADMIN
+
+    CategoryRequest:
+      type: object
+      required:
+        - name
+        - description
+        - bgColor
+      properties:
+        name:
+          type: string
+          example: Drinks
+        description:
+          type: string
+          example: Beverages
+        bgColor:
+          type: string
+          example: "#FF0000"
+
+    CategoryResponse:
+      type: object
+      properties:
+        categoryId:
+          type: string
+          example: "cat123456"
+        name:
+          type: string
+          example: Drinks
+        description:
+          type: string
+          example: Beverages
+        bgColor:
+          type: string
+          example: "#FF0000"
+        imgUrl:
+          type: string
+          example: "http://localhost:8080/uploads/drinks.png"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-08-18T12:34:56.789Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-08-18T12:34:56.789Z"
+
+    ItemRequest:
+      type: object
+      required:
+        - name
+        - price
+        - catrgoryId
+        - description
+      properties:
+        name:
+          type: string
+          example: Burger
+        price:
+          type: number
+          format: double
+          example: 50.0
+        catrgoryId:
+          type: string
+          example: "cat123"
+        description:
+          type: string
+          example: Delicious burger
+
+    ItemResponse:
+      type: object
+      properties:
+        itemId:
+          type: string
+          example: "itm123"
+        name:
+          type: string
+          example: Burger
+        price:
+          type: number
+          format: double
+          example: 50.0
+        categoryId:
+          type: string
+          example: "cat123"
+        description:
+          type: string
+          example: Delicious burger
+        categoryName:
+          type: string
+          example: Burgers
+        imgUrl:
+          type: string
+          example: "http://localhost:8080/uploads/burger.png"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-08-18T12:34:56.789Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2025-08-18T12:34:56.789Z"
+
+    OrderItemResponse:
+      type: object
+      properties:
+        itemId:
+          type: string
+          example: "itm123"
+        name:
+          type: string
+          example: Burger
+        price:
+          type: number
+          format: double
+          example: 50.0
+        quantity:
+          type: integer
+          example: 2
+
+    OrderItemRequest:
+      type: object
+      properties:
+        itemId:
+          type: string
+          example: "itm123"
+        name:
+          type: string
+          example: Burger
+        price:
+          type: number
+          format: double
+          example: 50.0
+        quantity:
+          type: integer
+          example: 2
+
+    OrderRequest:
+      type: object
+      required:
+        - customerName
+        - phoneNumber
+        - cartItems
+        - subtotal
+        - tax
+        - grandTotal
+        - paymentMethod
+      properties:
+        customerName:
+          type: string
+          example: Jane Doe
+        phoneNumber:
+          type: string
+          example: "+1234567890"
+        cartItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemRequest'
+        subtotal:
+          type: number
+          format: double
+          example: 100.0
+        tax:
+          type: number
+          format: double
+          example: 10.0
+        grandTotal:
+          type: number
+          format: double
+          example: 110.0
+        paymentMethod:
+          type: string
+          example: CARD
+
+    OrderResponse:
+      type: object
+      properties:
+        orderId:
+          type: string
+          example: "ord123456"
+        customerName:
+          type: string
+          example: Jane Doe
+        phoneNumber:
+          type: string
+          example: "+1234567890"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemResponse'
+        subtotal:
+          type: number
+          format: double
+          example: 100.0
+        tax:
+          type: number
+          format: double
+          example: 10.0
+        grandTotal:
+          type: number
+          format: double
+          example: 110.0
+        paymentMethod:
+          type: string
+          example: CARD
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-08-18T12:34:56.789Z"
+        paymentDetails:
+          type: object
+          description: Details about the payment
+
+    DashboardResponse:
+      type: object
+      properties:
+        todaySales:
+          type: number
+          format: double
+          example: 1500.5
+        todayOrderCount:
+          type: integer
+          example: 10
+        recentOrders:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderResponse'
+
+    PaymentRequest:
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 500
+        currency:
+          type: string
+          example: INR
+
+    PaymentVerificationRequest:
+      type: object
+      required:
+        - razorpayOrderId
+        - razorpayPaymentId
+        - razorpaySignature
+        - orderId
+      properties:
+        razorpayOrderId:
+          type: string
+          example: "order_9A33XWu170gUtm"
+        razorpayPaymentId:
+          type: string
+          example: "pay_29QQoUBi66xm2f"
+        razorpaySignature:
+          type: string
+          example: "abcdef123456"
+        orderId:
+          type: string
+          example: "ord123"
+
+    RazorpayOrderResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "order_9A33XWu170gUtm"
+        entity:
+          type: string
+          example: "order"
+        amount:
+          type: integer
+          example: 50000
+        currency:
+          type: string
+          example: "INR"
+        status:
+          type: string
+          example: "created"
+        created_at:
+          type: string
+          format: date-time
+          example: "2025-08-18T12:34:56.789Z"
+        receipt:
+          type: string
+          example: "receipt#123"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
